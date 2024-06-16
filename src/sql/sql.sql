@@ -30,8 +30,11 @@ CREATE TABLE `article` (
   `path` varchar(255) NOT NULL,
   `uploaded_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `users_id` int NOT NULL,
+  `kategoris_id` int NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_article_users_idx` (`users_id`),
+  KEY `FK_Article_kategoris_idx` (`kategoris_id`),
+  CONSTRAINT `FK_Article_kategoris` FOREIGN KEY (`kategoris_id`) REFERENCES `kategoris` (`id`),
   CONSTRAINT `FK_Article_users` FOREIGN KEY (`users_id`) REFERENCES `users` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -42,8 +45,30 @@ CREATE TABLE `article` (
 
 LOCK TABLES `article` WRITE;
 /*!40000 ALTER TABLE `article` DISABLE KEYS */;
-INSERT INTO `article` VALUES (15,'Lorem Ipsum Dolor Sit Amet','Lorem Ipsum Tolong Saya Tolonggggg Wkwkwkwkw','$2b$10$AnyFqhTgYQq7kiGmV6qahuYv0bwy59hsmKxERlPY4LOBgZq3BHArC.jpg','C:\\Users\\Public\\Music\\Backend\\src\\upload\\$2b$10$AnyFqhTgYQq7kiGmV6qahuYv0bwy59hsmKxERlPY4LOBgZq3BHArC.jpg','2024-06-16 08:48:47',1);
 /*!40000 ALTER TABLE `article` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `kategoris`
+--
+
+DROP TABLE IF EXISTS `kategoris`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `kategoris` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `kategoris`
+--
+
+LOCK TABLES `kategoris` WRITE;
+/*!40000 ALTER TABLE `kategoris` DISABLE KEYS */;
+/*!40000 ALTER TABLE `kategoris` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -83,4 +108,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-06-16 15:49:30
+-- Dump completed on 2024-06-16 17:16:15

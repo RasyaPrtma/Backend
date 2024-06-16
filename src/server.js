@@ -1,19 +1,21 @@
+// config
 require('dotenv').config();
-
 const hapi = require('@hapi/hapi');
 const jwt = require('@hapi/jwt')
 const pool = require('./models');
-const inert = require('@hapi/inert'); 
+const inert = require('@hapi/inert');
 
 
 // Plugins
 const authPlugin = require('./routes/auth');
 const articlePlugin = require('./routes/article');
+const kategoriPlugin = require('./routes/kategori');
 
- // Controller
- const AuthController = require('./controllers/AuthController');  
+
+// Controller
+const AuthController = require('./controllers/AuthController');
 const ArticleController = require('./controllers/ArticleController');
-
+const KategoriController = require('./controllers/KategoriController');
 
 // Init
 const init = async () => {
@@ -21,14 +23,15 @@ const init = async () => {
     // Controller 
     const Auth = new AuthController(pool);
     const Article = new ArticleController(pool);
+    const Kategori = new KategoriController(pool);
 
     // Server
 
     const server = hapi.server({
-        port:3000,
+        port: 3000,
         host: 'localhost',
-        routes:{
-            cors:{
+        routes: {
+            cors: {
                 origin: ['*']
             }
         }
@@ -57,25 +60,31 @@ const init = async () => {
     })
 
     await server.register(inert);
-    
+
 
     await server.register([
         {
             plugin: authPlugin,
-            options:{
+            options: {
                 service: Auth,
             }
-            
+
         },
         {
             plugin: articlePlugin,
-            options:{
+            options: {
                 service: Article
+            }
+        },
+        {
+            plugin: kategoriPlugin,
+            options: {
+                service: Kategori
             }
         }
     ]);
 
-    
+
     await server.start();
 
     console.log(`Server Berjalan Pada Server ${server.info.uri}`);

@@ -76,6 +76,22 @@ const routes = (handler) => [
         options: {
             auth: 'api_jwt'
         }
+    },
+    {
+        method: 'GET',
+        path: '/article/user',
+        handler: handler.getArticleUser,
+        options:{
+            auth: 'api_jwt'
+        }
+    },
+    {
+        method: 'GET',
+        path: '/article/kategori/{id}',
+        handler: handler.getArticleByKategori,
+        options:{
+            auth: 'api_jwt'
+        }
     }
 ]
 

@@ -8,15 +8,21 @@ class ArticleHandler {
         this.ArticleController = service;
 
         this.uploadArticle = this.uploadArticle.bind(this);
+        this.addArticle = this.addArticle.bind(this);
+        this.deleteArticleById = this.deleteArticleById.bind(this);
+        this.downloadImage = this.downloadImage.bind(this);
+        this.getAllArticles = this.getAllArticles.bind(this);
+        this.updateArticleById = this.updateArticleById.bind(this);
+        this.getArticleById = this.getArticleById.bind(this);
     }
 
-    addArticle = async (title,article,id,filename,path) =>{
-        const data = await this.ArticleController.addArticle(title,article,id,filename,path);
+    addArticle = async (title,article,id,filename,path,kategori) =>{
+        const data = await this.ArticleController.addArticle(title,article,id,filename,path,kategori);
         return data;
     }
 
     uploadArticle = async (req, h) => {
-        const { title, article, file } = req.payload;
+        const { title, article, file ,kategori} = req.payload;
         const { id } = req.auth.credentials;
     
         try {
@@ -31,7 +37,7 @@ class ArticleHandler {
             const data = file._data;
             await fs.promises.writeFile(filePath, data, 'binary');
     
-            this.addArticle(title, article, id, secureFileName, filePath);
+            this.addArticle(title, article, id, secureFileName, filePath,kategori);
     
             return h.response({
                 status: 'berhasil',
@@ -39,7 +45,8 @@ class ArticleHandler {
                 data: {
                     title: title,
                     article: article,
-                    foto: secureFileName
+                    foto: secureFileName,
+                    kategori:kategori
                 }
             }).code(201);
         } catch (err) {
@@ -78,6 +85,53 @@ class ArticleHandler {
             return h.response({ error: 'Server Error' }).code(500);
         }
     };
+
+    getArticleUser = async (req,h) => {
+        const {id} = req.auth.credentials;
+        try{
+
+            const article = await this.ArticleController.getArticleByUserId(id);
+
+            if(article.length == 0){
+                return h.response({status:'pedding',message:'Article Kosong'}).code(209);
+            }
+
+            return h.response({
+                status:'berhasil',
+                message:"Berhasil Mengambil Article",
+                data: article
+            }).code(200);
+
+        }catch(error){
+            console.log('server error: ',error);
+            return h.response(error).code(500);
+        }
+    }
+
+    getArticleByKategori = async (req,h) => {
+        const {id} = req.params;
+        try{
+
+            const article = await this.ArticleController.getArticleByKategoriId(id);
+
+            if(article.length == 0){
+                return h.response({
+                    status:'pending',
+                    message:'Article Tidak Ditemukan'
+                }).code(209)
+            }
+
+            return h.response({
+                status:'berhasil',
+                message:'Berhasil Mendapatkan Article',
+                data: article
+            }).code(200);
+
+        }catch(error){
+            console.log('Server Error:',error);
+            return h.response(error);
+        }
+    }
     
     downloadImage = async (request, h) => {
         const { id } = request.params;
@@ -112,7 +166,7 @@ class ArticleHandler {
 
     updateArticleById = async (request, h) => {
         const { idArticle } = request.params;
-        const { title, article, image } = request.payload;
+        const { title, article, image , kategori} = request.payload;
         const { id } = request.auth.credentials;
     
         try {
@@ -149,7 +203,8 @@ class ArticleHandler {
                     article,
                     id,
                     secureFileName,
-                    filePath
+                    filePath,
+                    kategori
                 );
     
                 if (existingArticle[0].filename) {
@@ -163,7 +218,8 @@ class ArticleHandler {
                     article,
                     id,
                     existingArticle[0].filename,
-                    existingArticle[0].path
+                    existingArticle[0].path,
+                    existingArticle[0].kategoris_id
                 );
             }
     
