@@ -32,7 +32,7 @@ class AuthHandler {
                 status: 'berhasil',
                 message: 'berhasil login',
                 data: {
-                    accessToken: token
+                    token
                 }
             }).code(200);
         }

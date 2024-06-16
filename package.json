@@ -10,7 +10,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@hapi/hapi": "^21.3.10",
+    "@hapi/hapi": "^21.3.9",
+    "@hapi/inert": "^7.1.0",
     "@hapi/jwt": "^3.2.0",
     "bcrypt": "^5.1.1",
     "dotenv": "^16.4.5",

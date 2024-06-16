@@ -3,6 +3,8 @@ require('dotenv').config();
 const hapi = require('@hapi/hapi');
 const jwt = require('@hapi/jwt')
 const pool = require('./models');
+const inert = require('@hapi/inert'); 
+
 
 // Plugins
 const authPlugin = require('./routes/auth');
@@ -23,7 +25,7 @@ const init = async () => {
     // Server
 
     const server = hapi.server({
-        port:4000,
+        port:3000,
         host: 'localhost',
         routes:{
             cors:{
@@ -38,24 +40,24 @@ const init = async () => {
         }
     ]);
 
-    server.auth.strategy('api_jwt','jwt',{
-        keys: '882cf3826475aeec414d83cfc3d34751051a2ed50e6e4b0190083eae78e01373207dd3e1644c65d5b45b07bf929533e42f0b3901300b87915b5cf604ce0fa061',
+    server.auth.strategy('api_jwt', 'jwt', {
+        keys: process.env.JWT_SECRET,
         verify: {
             aud: false,
             iss: false,
             sub: false,
-            maxAgeSec: 84000
+            maxAgeSec: 86400
         },
-        validate: (artifacts) => {
-            console.log("ARTIFACTS ", artifacts.decoded)
-            return ({
-                isValid: true,
-                credentials: {
-                    id: artifacts.decoded.payload.id,
-                }
-            })
-        }
-    });
+        validate: (artifacts) => ({
+            isValid: true,
+            credentials: {
+                id: artifacts.decoded.payload.id,
+            }
+        })
+    })
+
+    await server.register(inert);
+    
 
     await server.register([
         {
@@ -72,10 +74,9 @@ const init = async () => {
             }
         }
     ]);
+
     
-
     await server.start();
-
 
     console.log(`Server Berjalan Pada Server ${server.info.uri}`);
 }
