@@ -84,7 +84,7 @@ const routes = (handler) => [
         path: '/article/kategori/{id}',
         handler: handler.getArticleByKategori,
         options:{
-            auth: 'api_jwt  '
+            auth: 'api_jwt'
         }
     }
 ]
