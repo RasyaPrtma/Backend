@@ -8,14 +8,14 @@ const routes = (handler) => [
         handler: handler.uploadArticle,
         options: {
             auth: 'api_jwt',
-            payload:{
+            payload: {
                 maxBytes: 10 * 1024 * 1024, // 10mb
                 output: 'stream',
                 parse: true,
                 multipart: true,
                 allow: 'multipart/form-data'
             },
-            validate:{
+            validate: {
                 payload: joi.object({
                     title: joi.string().min(10).required(),
                     article: joi.string().min(20).required(),
@@ -28,16 +28,16 @@ const routes = (handler) => [
         method: 'GET',
         path: '/article/{id}',
         handler: handler.getArticleById,
-        options:{
-            auth:'api_jwt'
+        options: {
+            auth: 'api_jwt'
         }
     },
     {
         method: "GET",
         path: '/article/{id}/image',
         handler: handler.downloadImage,
-        options:{
-            auth:'api_jwt'
+        options: {
+            auth: 'api_jwt'
         }
     },
     {
@@ -50,7 +50,7 @@ const routes = (handler) => [
                 maxBytes: 10 * 1024 * 1024, // 10mb
                 output: 'stream', // Output type
                 parse: true, // Parse multipart/form-data
-                multipart:true,
+                multipart: true,
                 allow: 'multipart/form-data'
             },
             validate: {
@@ -65,7 +65,15 @@ const routes = (handler) => [
         method: 'DELETE',
         path: '/article/{id}',
         handler: handler.deleteArticleById,
-        options:{
+        options: {
+            auth: 'api_jwt'
+        }
+    },
+    {
+        method: 'GET',
+        path: '/article',
+        handler: handler.getAllArticles,
+        options: {
             auth: 'api_jwt'
         }
     }

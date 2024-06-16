@@ -8,7 +8,7 @@ class ArticleController {
         return result;
     }
 
-    getArticle = async () => {
+    getAllArticle = async () => {
         const [result] = await this.pool.query(`SELECT * FROM article`);
         return result;
     }

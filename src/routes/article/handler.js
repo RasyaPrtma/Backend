@@ -208,6 +208,34 @@ class ArticleHandler {
             return h.response({ error: 'Server Error' }).code(500);
         }
     };
+
+    getAllArticles = async (request, h) => {
+        try {
+            const articles = await this.ArticleController.getAllArticle();
+    
+            if (!articles || articles.length === 0) {
+                return h.response({ error: 'Tidak ada artikel yang ditemukan' }).code(404);
+            }
+    
+            const articlesData = articles.map(article => ({
+                id: article.id,
+                title: article.title,
+                content: article.article,
+                filename: article.filename
+            }));
+    
+            return {
+                status: 'success',
+                message: 'Artikel berhasil diambil',
+                data: {
+                    articles: articlesData
+                }
+            };
+        } catch (error) {
+            console.error('Error:', error);
+            return h.response({ error: 'Server Error' }).code(500);
+        }
+    };
 }
 
 module.exports = ArticleHandler;
