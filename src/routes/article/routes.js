@@ -35,10 +35,7 @@ const routes = (handler) => [
     {
         method: "GET",
         path: '/article/{id}/image',
-        handler: handler.downloadImage,
-        options: {
-            auth: 'api_jwt'
-        }
+        handler: handler.downloadImage
     },
     {
         method: 'PUT',
@@ -72,10 +69,7 @@ const routes = (handler) => [
     {
         method: 'GET',
         path: '/article',
-        handler: handler.getAllArticles,
-        options: {
-            auth: 'api_jwt'
-        }
+        handler: handler.getAllArticles
     },
     {
         method: 'GET',
@@ -90,7 +84,7 @@ const routes = (handler) => [
         path: '/article/kategori/{id}',
         handler: handler.getArticleByKategori,
         options:{
-            auth: 'api_jwt'
+            auth: 'api_jwt  '
         }
     }
 ]
