@@ -10,7 +10,7 @@ const routes = (handler) => [
                 payload: joi.object({
                     name: joi.string().min(5).required(),
                     username: joi.string().min(5).required(),
-                    email: joi.string().email().required(),
+                    email: joi.string().required(),
                     password: joi.string().min(5).required()
                 })
             }
@@ -23,7 +23,7 @@ const routes = (handler) => [
         options:{
             validate:{
                 payload: joi.object({
-                    email: joi.string().email().required(),
+                    email: joi.string().required(),
                     password: joi.string().min(5).required()
                 })
             }

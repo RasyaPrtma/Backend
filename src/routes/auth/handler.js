@@ -10,8 +10,9 @@ class AuthHandler {
 
      loginHandler = async (req,h) => {
         const {email,password} = req.payload;
+        try{
 
-
+            
         const auth = await this.AuthController.GetUserEmail(email);
 
         if(auth.length == 0){
@@ -35,11 +36,22 @@ class AuthHandler {
                     token
                 }
             }).code(200);
+        }else{
+            return h.response({
+                status:'gagal',
+                message: 'Password Anda Salah'
+            }).code(400);
+        }
+
+        }catch(err){
+            console.log('Server Error',err);
+            return h.response(err).code(500);
         }
     }
 
     registerHandler = async (req,h) => {
         const {name,username,email,password} = req.payload;
+      try{
 
         const passhash = bcrypt.hashSync(password,10);
 
@@ -52,12 +64,16 @@ class AuthHandler {
             }).code(409);
         }
 
-        const data = await this.AuthController.Register(name,username,email,passhash);
+        await this.AuthController.Register(name,username,email,passhash);
 
         return h.response({
             status: 'berhasil',
             message: 'berhasil membuat akun'
         }).code(201);
+      }catch(err){
+        console.log('Server Error',err);
+        return h.response(err).code(500)
+      }
     }
 }
 
