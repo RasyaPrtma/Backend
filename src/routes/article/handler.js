@@ -4,8 +4,9 @@ const uploadDir = path.join(__dirname, '../../upload');
 const bcrypt = require('bcrypt');
 
 class ArticleHandler {
-    constructor(service) {
+    constructor(service,serviceKategori) {
         this.ArticleController = service;
+        this.KategoriController = serviceKategori;
 
         this.uploadArticle = this.uploadArticle.bind(this);
         this.addArticle = this.addArticle.bind(this);
@@ -14,6 +15,8 @@ class ArticleHandler {
         this.getAllArticles = this.getAllArticles.bind(this);
         this.updateArticleById = this.updateArticleById.bind(this);
         this.getArticleById = this.getArticleById.bind(this);
+        this.searchArticleByName = this.searchArticleByName.bind(this);
+        this.sortArticle = this.sortArticle.bind(this);
     }
 
     addArticle = async (title,article,id,filename,path,kategori) =>{
@@ -24,8 +27,18 @@ class ArticleHandler {
     uploadArticle = async (req, h) => {
         const { title, article, file ,kategori} = req.payload;
         const { id } = req.auth.credentials;
-    
         try {
+            const categoris = await this.KategoriController.getKategoriByName(kategori);
+
+            console.log(categoris);
+
+            if(categoris.length == 0){
+                return h.response({
+                    status:'gagal',
+                    message:'Kategori Tidak Ditemukan'
+                }).code(404);
+            }
+
             const filename = file.hapi.filename;
             const fileExt = path.extname(filename);
     
@@ -37,7 +50,7 @@ class ArticleHandler {
             const data = file._data;
             await fs.promises.writeFile(filePath, data, 'binary');
     
-            this.addArticle(title, article, id, secureFileName, filePath,kategori);
+            this.addArticle(title, article, id, secureFileName, filePath,categoris[0].id);
     
             return h.response({
                 status: 'berhasil',
@@ -46,7 +59,7 @@ class ArticleHandler {
                     title: title,
                     article: article,
                     foto: secureFileName,
-                    kategori:kategori
+                    kategori:categoris[0].name
                 }
             }).code(201);
         } catch (err) {
@@ -73,13 +86,13 @@ class ArticleHandler {
                 articleData.filename = article[0].filename;
             }
     
-            return {
+            return h.respnse({
                 status: 'berhasil',
                 message: 'Article retrieved successfully',
                 data: {
                     article: articleData
                 }
-            };
+            });
         } catch (error) {
             console.log(error);
             return h.response({ error: 'Server Error' }).code(500);
@@ -176,7 +189,6 @@ class ArticleHandler {
                 return h.response({ error: 'Article tidak ditemukan' }).code(404);
             }
     
-            let updatedArticle;
             let deletedOldImage = false;
     
             if (image && image.hapi) {
@@ -223,11 +235,11 @@ class ArticleHandler {
                 );
             }
     
-            return {
+            return h.response({
                 status: 'berhasil',
                 message: 'Article Berhasil Di Update',
                 deletedOldImage: deletedOldImage
-            };
+            }).code(200);
         } catch (error) {
             console.error('Error:', error);
             return h.response({ error: 'Server Error' }).code(500);
@@ -255,10 +267,10 @@ class ArticleHandler {
                 }
             }
     
-            return {
+            return h.response({
                 status: 'berhasil',
                 message: 'Article berhasil dihapus'
-            };
+            }).code(200);
         } catch (error) {
             console.error('Error:', error);
             return h.response({ error: 'Server Error' }).code(500);
@@ -280,18 +292,66 @@ class ArticleHandler {
                 filename: article.filename
             }));
     
-            return {
-                status: 'success',
+            return h.response({
+                status: 'berhasil',
                 message: 'Artikel berhasil diambil',
                 data: {
                     articles: articlesData
                 }
-            };
+            }).code(200);
         } catch (error) {
             console.error('Error:', error);
             return h.response({ error: 'Server Error' }).code(500);
         }
     };
+
+    searchArticleByName = async (req,h) => {
+        const {name} = req.params;
+        try{
+            const data = await this.ArticleController.searchArticle(name);
+
+            if(data.length == 0){
+                return h.response({
+                    status: 'pending',
+                    message: 'Article Tidak Ditemukan'
+                }).code(209);
+            }
+
+            return h.response({
+                status:'berhasil',
+                message: 'Artikel Berhasil diambil',
+                data: data
+            }).code(200);
+
+        }
+        catch(error){
+            console.log('Server Error : ',error);
+            return h.response(error).code(500);
+        }
+    }
+
+    sortArticle = async (req,h) => {
+        const {name,type} = req.params;
+        try{
+            const data = await this.ArticleController.sortingArticle(name,type);
+
+            if(data.length == 0){
+                return h.response({
+                    status: 'gagal',
+                    message: 'article tidak ditemukan'
+                }).code(209);
+            }
+
+            return h.response({
+                status:'berhasil',
+                message:'Artikel berhasil diambil',
+                data: data
+            })
+        }catch(err){
+            console.log('Server Error',err);
+            return h.response(err);
+        }
+    }
 }
 
 module.exports = ArticleHandler;

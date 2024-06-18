@@ -73,7 +73,8 @@ const init = async () => {
         {
             plugin: articlePlugin,
             options: {
-                service: Article
+                service: Article,
+                serviceKategori:Kategori
             }
         },
         {

@@ -4,7 +4,7 @@ class KategoriController{
     }
 
     addKategori = async (name) => {
-        const [result] = this.pool.execute(`INSERT INTO kategoris (name) VALUES (?)`,[name]);
+        const [result] = await this.pool.execute(`INSERT INTO kategoris (name) VALUES (?)`, [name]);
         return result;
     }
 
@@ -14,7 +14,7 @@ class KategoriController{
     }
 
     getKategoriByName = async (name) =>{
-        const [result] = await this.pool.query(`SELECT * FROM kategoris WHERE name LIKE ?`, [`%${name}%`]);
+        const [result] = await this.pool.query(`SELECT * FROM kategoris WHERE name = ?`, [name]);
         return result;
     }
 

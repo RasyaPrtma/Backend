@@ -19,7 +19,8 @@ const routes = (handler) => [
                 payload: joi.object({
                     title: joi.string().min(10).required(),
                     article: joi.string().min(20).required(),
-                    file: joi.any().required()
+                    file: joi.any().required(),
+                    kategori: joi.string().required()
                 })
             }
         }
@@ -75,7 +76,7 @@ const routes = (handler) => [
         method: 'GET',
         path: '/article/user',
         handler: handler.getArticleUser,
-        options:{
+        options: {
             auth: 'api_jwt'
         }
     },
@@ -83,10 +84,21 @@ const routes = (handler) => [
         method: 'GET',
         path: '/article/kategori/{id}',
         handler: handler.getArticleByKategori,
-        options:{
+        options: {
             auth: 'api_jwt'
         }
+    },
+    {
+        method: 'GET',
+        path: '/article/search/{name}',
+        handler: handler.searchArticleByName
+    },
+    {
+        method: 'GET',
+        path: '/article/sort/{name}/type/{type}',
+        handler: handler.sortArticle
     }
+
 ]
 
 module.exports = routes;

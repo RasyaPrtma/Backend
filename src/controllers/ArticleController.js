@@ -40,6 +40,16 @@ class ArticleController {
         const [result] = await this.pool.execute(`DELETE FROM article WHERE id = ${id}`);
         return result;
     }
+
+    searchArticle = async (name) => {
+        const[result] = await this.pool.query(`SELECT * FROM article WHERE title LIKE ?`,[`%${name}%`]);
+        return result;
+    }
+
+    sortingArticle = async (name,type) => {
+        const [result] = await this.pool.query(`SELECT * FROM article ORDER BY ${name} ${type}`);
+        return result;
+    }
 }
 
 module.exports = ArticleController;
