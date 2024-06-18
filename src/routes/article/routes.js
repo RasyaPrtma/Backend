@@ -1,15 +1,20 @@
-const joi = require('joi');
-const bcrypt = require('bcrypt');
+const joi = require('joi'); // Memanggil library Joi untuk validasi
+const bcrypt = require('bcrypt'); // Memanggil library bcrypt untuk hashing
 
+/**
+ * Membuat array konfigurasi rute untuk artikel berdasarkan handler yang diberikan.
+ * @param {Object} handler - Objek handler yang berisi fungsi-fungsi untuk mengelola artikel.
+ * @returns {Array} - Array berisi konfigurasi rute untuk artikel.
+ */
 const routes = (handler) => [
     {
         method: 'POST',
         path: '/article',
         handler: handler.uploadArticle,
         options: {
-            auth: 'api_jwt',
+            auth: 'api_jwt', // Mengharuskan autentikasi JWT untuk mengakses rute ini
             payload: {
-                maxBytes: 10 * 1024 * 1024, // 10mb
+                maxBytes: 10 * 1024 * 1024, // Batas maksimum ukuran payload (10MB)
                 output: 'stream',
                 parse: true,
                 multipart: true,
@@ -17,10 +22,10 @@ const routes = (handler) => [
             },
             validate: {
                 payload: joi.object({
-                    title: joi.string().min(10).required(),
-                    article: joi.string().min(20).required(),
-                    file: joi.any().required(),
-                    kategori: joi.string().required()
+                    title: joi.string().min(10).required(), // Validasi title minimal 10 karakter
+                    article: joi.string().min(20).required(), // Validasi artikel minimal 20 karakter
+                    file: joi.any().required(), // Validasi file wajib ada
+                    kategori: joi.string().required() // Validasi kategori wajib ada
                 })
             }
         }
@@ -28,10 +33,7 @@ const routes = (handler) => [
     {
         method: 'GET',
         path: '/article/{id}',
-        handler: handler.getArticleById,
-        options: {
-            auth: 'api_jwt'
-        }
+        handler: handler.articleById,
     },
     {
         method: "GET",
@@ -41,20 +43,22 @@ const routes = (handler) => [
     {
         method: 'PUT',
         path: '/article/{idArticle}',
-        handler: handler.updateArticleById,
+        handler: handler.updateArticle,
         options: {
-            auth: 'api_jwt',
+            auth: 'api_jwt', // Mengharuskan autentikasi JWT untuk mengakses rute ini
             payload: {
-                maxBytes: 10 * 1024 * 1024, // 10mb
-                output: 'stream', // Output type
-                parse: true, // Parse multipart/form-data
+                maxBytes: 10 * 1024 * 1024,
+                output: 'stream',
+                parse: true,
                 multipart: true,
                 allow: 'multipart/form-data'
             },
             validate: {
                 payload: joi.object({
-                    title: joi.string().min(10).required(),
-                    article: joi.string().min(20).required()
+                    title: joi.string().min(10).required(), // Validasi title minimal 10 karakter
+                    article: joi.string().min(20).required(), // Validasi artikel minimal 20 karakter
+                    image: joi.any(), // Validasi image (opsional)
+                    kategori: joi.string() // Validasi kategori (opsional)
                 })
             }
         }
@@ -64,7 +68,7 @@ const routes = (handler) => [
         path: '/article/{id}',
         handler: handler.deleteArticleById,
         options: {
-            auth: 'api_jwt'
+            auth: 'api_jwt' // Mengharuskan autentikasi JWT untuk mengakses rute ini
         }
     },
     {
@@ -77,7 +81,7 @@ const routes = (handler) => [
         path: '/article/user',
         handler: handler.getArticleUser,
         options: {
-            auth: 'api_jwt'
+            auth: 'api_jwt' // Mengharuskan autentikasi JWT untuk mengakses rute ini
         }
     },
     {
@@ -85,7 +89,7 @@ const routes = (handler) => [
         path: '/article/kategori/{id}',
         handler: handler.getArticleByKategori,
         options: {
-            auth: 'api_jwt'
+            auth: 'api_jwt' // Mengharuskan autentikasi JWT untuk mengakses rute ini
         }
     },
     {
@@ -99,11 +103,10 @@ const routes = (handler) => [
         handler: handler.sortArticle
     },
     {
-        method:'GET',
+        method: 'GET',
         path: '/article/filter/{kategori}',
         handler: handler.filterArticleByKategori
     }
+];
 
-]
-
-module.exports = routes;
+module.exports = routes; // Ekspor fungsi routes yang telah dibuat untuk digunakan di file lain

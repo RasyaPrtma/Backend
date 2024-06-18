@@ -1,10 +1,16 @@
 const fs = require('fs');
 const path = require('path');
-const uploadDir = path.join(__dirname, '../../upload'); 
 const bcrypt = require('bcrypt');
+const uploadDir = path.join(__dirname, '../../upload');
 
+/**
+ * @class ArticleHandler
+ * @classdesc Kelas ini menangani berbagai operasi terkait artikel, termasuk upload, delete, update, dan lain-lain.
+ * @param {Object} service - Service untuk menangani operasi artikel.
+ * @param {Object} serviceKategori - Service untuk menangani operasi kategori.
+ */
 class ArticleHandler {
-    constructor(service,serviceKategori) {
+    constructor(service, serviceKategori) {
         this.ArticleController = service;
         this.KategoriController = serviceKategori;
 
@@ -13,36 +19,52 @@ class ArticleHandler {
         this.deleteArticleById = this.deleteArticleById.bind(this);
         this.downloadImage = this.downloadImage.bind(this);
         this.getAllArticles = this.getAllArticles.bind(this);
-        this.updateArticleById = this.updateArticleById.bind(this);
-        this.getArticleById = this.getArticleById.bind(this);
+        this.updateArticle = this.updateArticle.bind(this);
+        this.articleById = this.articleById.bind(this);
         this.searchArticleByName = this.searchArticleByName.bind(this);
         this.sortArticle = this.sortArticle.bind(this);
     }
 
-    addArticle = async (title,article,id,filename,path,kategori) =>{
-        const data = await this.ArticleController.addArticle(title,article,id,filename,path,kategori);
+    /**
+     * Menambahkan artikel ke dalam database.
+     * @async
+     * @param {string} title - Judul artikel.
+     * @param {string} article - Isi artikel.
+     * @param {number} id - ID pengguna.
+     * @param {string} filename - Nama file gambar.
+     * @param {string} path - Path file gambar.
+     * @param {number} kategori - ID kategori.
+     * @returns {Promise<Object>} Data artikel yang ditambahkan.
+     */
+    addArticle = async (title, article, id, filename, path, kategori) => {
+        const data = await this.ArticleController.addArticle(title, article, id, filename, path, kategori);
         return data;
     }
 
+    /**
+     * Mengunggah artikel baru.
+     * @async
+     * @param {Object} req - Request object.
+     * @param {Object} h - Response toolkit.
+     * @returns {Promise<Object>} Response.
+     */
     uploadArticle = async (req, h) => {
-        const { title, article, file ,kategori} = req.payload;
+        const { title, article, file, kategori } = req.payload;
         const { id } = req.auth.credentials;
         try {
             const categoris = await this.KategoriController.getKategoriByName(kategori);
 
-            console.log(categoris);
-
-            if(categoris.length == 0){
+            if (categoris.length == 0) {
                 return h.response({
-                    status:'gagal',
-                    message:'Kategori Tidak Ditemukan'
+                    status: 'gagal',
+                    message: 'Kategori Tidak Ditemukan'
                 }).code(404);
             }
 
             const filename = file.hapi.filename;
             const fileExt = path.extname(filename);
     
-            const timestamp = Date.now().toString(); 
+            const timestamp = Date.now().toString();
             const hash = await bcrypt.hash(timestamp, 10);
             const secureFileName = `${hash}${fileExt}`;
             const filePath = path.join(uploadDir, secureFileName);
@@ -50,7 +72,7 @@ class ArticleHandler {
             const data = file._data;
             await fs.promises.writeFile(filePath, data, 'binary');
     
-            this.addArticle(title, article, id, secureFileName, filePath,categoris[0].id);
+            await this.addArticle(title, article, id, secureFileName, filePath, categoris[0].id);
     
             return h.response({
                 status: 'berhasil',
@@ -59,16 +81,23 @@ class ArticleHandler {
                     title: title,
                     article: article,
                     foto: secureFileName,
-                    kategori:categoris[0].name
+                    kategori: categoris[0].name
                 }
             }).code(201);
         } catch (err) {
             return h.response({ status: 'gagal', message: 'Upload gagal!' }).code(500);
         }
     }
-    getArticleById = async (request, h) => {
+
+    /**
+     * Mengambil artikel berdasarkan ID.
+     * @async
+     * @param {Object} request - Request object.
+     * @param {Object} h - Response toolkit.
+     * @returns {Promise<Object>} Response.
+     */
+    articleById = async (request, h) => {
         const { id } = request.params;
-    
         try {
             const article = await this.ArticleController.getArticleById(id);
     
@@ -86,7 +115,7 @@ class ArticleHandler {
                 articleData.filename = article[0].filename;
             }
     
-            return h.respnse({
+            return h.response({
                 status: 'berhasil',
                 message: 'Article retrieved successfully',
                 data: {
@@ -97,55 +126,74 @@ class ArticleHandler {
             console.log(error);
             return h.response({ error: 'Server Error' }).code(500);
         }
-    };
+    }
 
-    getArticleUser = async (req,h) => {
-        const {id} = req.auth.credentials;
-        try{
-
+    /**
+     * Mengambil artikel pengguna.
+     * @async
+     * @param {Object} req - Request object.
+     * @param {Object} h - Response toolkit.
+     * @returns {Promise<Object>} Response.
+     */
+    getArticleUser = async (req, h) => {
+        const { id } = req.auth.credentials;
+        try {
             const article = await this.ArticleController.getArticleByUserId(id);
 
-            if(article.length == 0){
-                return h.response({status:'pedding',message:'Article Kosong'}).code(209);
+            if (article.length == 0) {
+                return h.response({ status: 'pending', message: 'Article Kosong' }).code(209);
             }
 
             return h.response({
-                status:'berhasil',
-                message:"Berhasil Mengambil Article",
+                status: 'berhasil',
+                message: "Berhasil Mengambil Article",
                 data: article
             }).code(200);
 
-        }catch(error){
-            console.log('server error: ',error);
+        } catch (error) {
+            console.log('server error: ', error);
             return h.response(error).code(500);
         }
     }
 
-    getArticleByKategori = async (req,h) => {
-        const {id} = req.params;
-        try{
-
+    /**
+     * Mengambil artikel berdasarkan ID kategori.
+     * @async
+     * @param {Object} req - Request object.
+     * @param {Object} h - Response toolkit.
+     * @returns {Promise<Object>} Response.
+     */
+    getArticleByKategori = async (req, h) => {
+        const { id } = req.params;
+        try {
             const article = await this.ArticleController.getArticleByKategoriId(id);
 
-            if(article.length == 0){
+            if (article.length == 0) {
                 return h.response({
-                    status:'pending',
-                    message:'Article Tidak Ditemukan'
-                }).code(209)
+                    status: 'pending',
+                    message: 'Article Tidak Ditemukan'
+                }).code(209);
             }
 
             return h.response({
-                status:'berhasil',
-                message:'Berhasil Mendapatkan Article',
+                status: 'berhasil',
+                message: 'Berhasil Mendapatkan Article',
                 data: article
             }).code(200);
 
-        }catch(error){
-            console.log('Server Error:',error);
+        } catch (error) {
+            console.log('Server Error:', error);
             return h.response(error);
         }
     }
     
+    /**
+     * Mengunduh gambar artikel.
+     * @async
+     * @param {Object} request - Request object.
+     * @param {Object} h - Response toolkit.
+     * @returns {Promise<Object>} Response.
+     */
     downloadImage = async (request, h) => {
         const { id } = request.params;
     
@@ -175,23 +223,31 @@ class ArticleHandler {
             console.log(error);
             return h.response({ error: 'Server Error' }).code(500);
         }
-    };
+    }
 
-    updateArticleById = async (request, h) => {
+    /**
+     * Memperbarui artikel berdasarkan ID.
+     * @async
+     * @param {Object} request - Request object.
+     * @param {Object} h - Response toolkit.
+     * @returns {Promise<Object>} Response.
+     */
+    updateArticle = async (request, h) => {
         const { idArticle } = request.params;
-        const { title, article, image , kategori} = request.payload;
+        const { title, article, image, kategori } = request.payload;
         const { id } = request.auth.credentials;
-    
         try {
             const existingArticle = await this.ArticleController.getArticleById(idArticle);
-    
+
             if (!existingArticle || !existingArticle[0]) {
                 return h.response({ error: 'Article tidak ditemukan' }).code(404);
             }
     
             let deletedOldImage = false;
+            let updatedArticle;
+            const newKat = kategori !== undefined ? await this.KategoriController.getKategoriByName(kategori) : null;
     
-            if (image && image.hapi) {
+            if (image && image.hapi && kategori !== undefined) {
                 const fileData = image._data;
     
                 if (!fileData || !Buffer.isBuffer(fileData)) {
@@ -207,16 +263,15 @@ class ArticleHandler {
                 const filePath = path.join(uploadDir, secureFileName);
     
                 await fs.promises.mkdir(path.dirname(filePath), { recursive: true });
-    
                 await fs.promises.writeFile(filePath, fileData);
-    
+
                 updatedArticle = await this.ArticleController.updateArticleById(idArticle,
                     title,
                     article,
                     id,
                     secureFileName,
                     filePath,
-                    kategori
+                    newKat[0].id
                 );
     
                 if (existingArticle[0].filename) {
@@ -231,7 +286,7 @@ class ArticleHandler {
                     id,
                     existingArticle[0].filename,
                     existingArticle[0].path,
-                    existingArticle[0].kategoris_id
+                    newKat !== null ? newKat[0].id : existingArticle[0].id
                 );
             }
     
@@ -244,8 +299,15 @@ class ArticleHandler {
             console.error('Error:', error);
             return h.response({ error: 'Server Error' }).code(500);
         }
-    };
+    }
     
+    /**
+     * Menghapus artikel berdasarkan ID.
+     * @async
+     * @param {Object} request - Request object.
+     * @param {Object} h - Response toolkit.
+     * @returns {Promise<Object>} Response.
+     */
     deleteArticleById = async (request, h) => {
         const { id } = request.params;
     
@@ -275,8 +337,15 @@ class ArticleHandler {
             console.error('Error:', error);
             return h.response({ error: 'Server Error' }).code(500);
         }
-    };
+    }
 
+    /**
+     * Mengambil semua artikel.
+     * @async
+     * @param {Object} request - Request object.
+     * @param {Object} h - Response toolkit.
+     * @returns {Promise<Object>} Response.
+     */
     getAllArticles = async (request, h) => {
         try {
             const articles = await this.ArticleController.getAllArticle();
@@ -294,14 +363,21 @@ class ArticleHandler {
             console.error('Error:', error);
             return h.response({ error: 'Server Error' }).code(500);
         }
-    };
+    }
 
-    searchArticleByName = async (req,h) => {
-        const {name} = req.params;
-        try{
+    /**
+     * Mencari artikel berdasarkan nama.
+     * @async
+     * @param {Object} req - Request object.
+     * @param {Object} h - Response toolkit.
+     * @returns {Promise<Object>} Response.
+     */
+    searchArticleByName = async (req, h) => {
+        const { name } = req.params;
+        try {
             const data = await this.ArticleController.searchArticle(name);
 
-            if(data.length == 0){
+            if (data.length == 0) {
                 return h.response({
                     status: 'pending',
                     message: 'Article Tidak Ditemukan'
@@ -309,24 +385,30 @@ class ArticleHandler {
             }
 
             return h.response({
-                status:'berhasil',
+                status: 'berhasil',
                 message: 'Artikel Berhasil diambil',
                 data: data
             }).code(200);
 
-        }
-        catch(error){
-            console.log('Server Error : ',error);
+        } catch (error) {
+            console.log('Server Error : ', error);
             return h.response(error).code(500);
         }
     }
 
-    sortArticle = async (req,h) => {
-        const {name,type} = req.params;
-        try{
-            const data = await this.ArticleController.sortingArticle(name,type);
+    /**
+     * Mengurutkan artikel.
+     * @async
+     * @param {Object} req - Request object.
+     * @param {Object} h - Response toolkit.
+     * @returns {Promise<Object>} Response.
+     */
+    sortArticle = async (req, h) => {
+        const { name, type } = req.params;
+        try {
+            const data = await this.ArticleController.sortingArticle(name, type);
 
-            if(data.length == 0){
+            if (data.length == 0) {
                 return h.response({
                     status: 'gagal',
                     message: 'article tidak ditemukan'
@@ -334,37 +416,44 @@ class ArticleHandler {
             }
 
             return h.response({
-                status:'berhasil',
-                message:'Artikel berhasil diambil',
+                status: 'berhasil',
+                message: 'Artikel berhasil diambil',
                 data: data
-            }).code(200)
-        }catch(err){
-            console.log('Server Error',err);
+            }).code(200);
+        } catch (err) {
+            console.log('Server Error', err);
             return h.response(err).code(500);
         }
     }
 
-    filterArticleByKategori =  async (req,h) => {
-        const {kategori} = req.params;
-        try{
+    /**
+     * Memfilter artikel berdasarkan kategori.
+     * @async
+     * @param {Object} req - Request object.
+     * @param {Object} h - Response toolkit.
+     * @returns {Promise<Object>} Response.
+     */
+    filterArticleByKategori = async (req, h) => {
+        const { kategori } = req.params;
+        try {
             const data = await this.KategoriController.getKategoriByName(kategori);
 
-            if(data.length == 0){
+            if (data.length == 0) {
                 return h.response({
-                    status:'gagal',
-                    message:'kategori tidak ditemukan'
+                    status: 'gagal',
+                    message: 'kategori tidak ditemukan'
                 }).code(404);
             }
 
             const categoris = await this.ArticleController.filterArticle(data[0].id);
 
             return h.response({
-                status:'berhasil',
-                message:'berhasil Mengambil Artikel',
+                status: 'berhasil',
+                message: 'berhasil Mengambil Artikel',
                 data: categoris
             }).code(200);
-        }catch(err){
-            console.log('Server Error',err);
+        } catch (err) {
+            console.log('Server Error', err);
             return h.response(err).code(500);
         }
     }
