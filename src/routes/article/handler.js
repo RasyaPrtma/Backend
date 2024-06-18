@@ -346,10 +346,35 @@ class ArticleHandler {
                 status:'berhasil',
                 message:'Artikel berhasil diambil',
                 data: data
-            })
+            }).code(200)
         }catch(err){
             console.log('Server Error',err);
-            return h.response(err);
+            return h.response(err).code(500);
+        }
+    }
+
+    filterArticleByKategori =  async (req,h) => {
+        const {kategori} = req.params;
+        try{
+            const data = await this.KategoriController.getKategoriByName(kategori);
+
+            if(data.length == 0){
+                return h.response({
+                    status:'gagal',
+                    message:'kategori tidak ditemukan'
+                }).code(404);
+            }
+
+            const categoris = await this.ArticleController.filterArticle(data[0].id);
+
+            return h.response({
+                status:'berhasil',
+                message:'berhasil Mengambil Artikel',
+                data: categoris
+            }).code(200);
+        }catch(err){
+            console.log('Server Error',err);
+            return h.response(err).code(500);
         }
     }
 }

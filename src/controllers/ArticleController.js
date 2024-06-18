@@ -50,6 +50,11 @@ class ArticleController {
         const [result] = await this.pool.query(`SELECT * FROM article ORDER BY ${name} ${type}`);
         return result;
     }
+
+    filterArticle = async (kategori) => {
+        const [result] =  await this.pool.query(`SELECT * FROM article WHERE kategoris_id = ${kategori}`);
+        return result;
+    }
 }
 
 module.exports = ArticleController;

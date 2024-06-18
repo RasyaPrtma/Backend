@@ -97,6 +97,11 @@ const routes = (handler) => [
         method: 'GET',
         path: '/article/sort/{name}/type/{type}',
         handler: handler.sortArticle
+    },
+    {
+        method:'GET',
+        path: '/article/filter/{kategori}',
+        handler: handler.filterArticleByKategori
     }
 
 ]
