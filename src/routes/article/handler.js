@@ -164,10 +164,10 @@ class ArticleHandler {
                 return h.response({ error: 'File tidak ditemukan' }).code(404);
             }
     
-            const fileStream = fs.createReadStream(filePath);
+            const fileStream = fs.readFileSync(filePath);
     
             const response = h.response(fileStream);
-            response.type('image/jpeg'); // Adjust content type as needed
+            response.type('image/png;based64');
             response.header('Content-Disposition', `attachment; filename="${article[0].filename}"`);
     
             return response;
@@ -285,19 +285,10 @@ class ArticleHandler {
                 return h.response({ error: 'Tidak ada artikel yang ditemukan' }).code(404);
             }
     
-            const articlesData = articles.map(article => ({
-                id: article.id,
-                title: article.title,
-                content: article.article,
-                filename: article.filename
-            }));
-    
             return h.response({
                 status: 'berhasil',
                 message: 'Artikel berhasil diambil',
-                data: {
-                    articles: articlesData
-                }
+                data: articles
             }).code(200);
         } catch (error) {
             console.error('Error:', error);
