@@ -9,8 +9,6 @@ class kategoriHandler{
 
             const findKategori = await this.KategoriController.getKategoriByName(name);
 
-            console.log(findKategori);
-
             if(findKategori.length > 0){
                 return h.response({status:'pending',message:'Kategori Sudah Ada!'});
             }
@@ -32,8 +30,6 @@ class kategoriHandler{
         try{
 
             const kategori = await this.KategoriController.getAllKategori();
-
-            console.log(kategori);
 
             if(kategori.length == 0){
                 return  h.response({
