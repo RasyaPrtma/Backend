@@ -13,7 +13,7 @@ const routes = (handler) => [
         options: {
             validate: {
                 payload: Joi.object({
-                    name: Joi.string().min(5).required() // Validasi nama kategori minimal 5 karakter
+                    name: Joi.string().min(2).required() // Validasi nama kategori minimal 5 karakter
                 })
             }
         }
