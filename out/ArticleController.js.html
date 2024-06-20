@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: ArticleController.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: ArticleController.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Controller untuk mengelola artikel.
+ */
+class ArticleController {
+    /**
+     * @param {Object} pool - Pool koneksi database.
+     */
+    constructor(pool) {
+        this.pool = pool;
+    }
+
+    /**
+     * Menambahkan artikel baru ke database.
+     * @param {string} title - Judul artikel.
+     * @param {string} article - Isi artikel.
+     * @param {number} users_id - ID pengguna.
+     * @param {string} filename - Nama file gambar.
+     * @param {string} path - Path file gambar.
+     * @param {number} kategoris - ID kategori.
+     * @returns {Promise&lt;Object>} Hasil eksekusi query.
+     */
+    addArticle = async (title, article, users_id, filename, path, kategoris) => {
+        const [result] = await this.pool.execute(
+            `INSERT INTO article (title, article, users_id, filename, path, kategoris_id) VALUES (?,?,?,?,?,?)`,
+            [title, article, users_id, filename, path, kategoris]
+        );
+        return result;
+    }
+
+    /**
+     * Mendapatkan semua artikel dari database.
+     * @returns {Promise&lt;Array>} Daftar semua artikel.
+     */
+    getAllArticle = async () => {
+        const [result] = await this.pool.query(`SELECT * FROM article`);
+        return result;
+    }
+
+    /**
+     * Mendapatkan artikel berdasarkan ID.
+     * @param {number} id - ID artikel.
+     * @returns {Promise&lt;Object>} Artikel yang ditemukan.
+     */
+    getArticleById = async (id) => {
+        const [result] = await this.pool.query(`SELECT * FROM article WHERE id = ${id}`);
+        return result;
+    }
+
+    /**
+     * Mendapatkan artikel berdasarkan ID pengguna.
+     * @param {number} id - ID pengguna.
+     * @returns {Promise&lt;Array>} Daftar artikel yang dimiliki oleh pengguna.
+     */
+    getArticleByUserId = async (id) => {
+        const [result] = await this.pool.query('SELECT * FROM article WHERE users_id = :id', { id });
+        return result;
+    }
+
+    /**
+     * Mendapatkan artikel berdasarkan ID kategori.
+     * @param {number} id - ID kategori.
+     * @returns {Promise&lt;Array>} Daftar artikel yang sesuai dengan kategori.
+     */
+    getArticleByKategoriId = async (id) => {
+        const [result] = await this.pool.query('SELECT * FROM article WHERE kategoris_id = :id', { id });
+        return result;
+    }
+
+    /**
+     * Memperbarui artikel berdasarkan ID.
+     * @param {number} id - ID artikel.
+     * @param {string} title - Judul artikel.
+     * @param {string} article - Isi artikel.
+     * @param {number} users_id - ID pengguna.
+     * @param {string} filename - Nama file gambar.
+     * @param {string} path - Path file gambar.
+     * @param {number} kategoris - ID kategori.
+     * @returns {Promise&lt;Object>} Hasil eksekusi query.
+     */
+    updateArticleById = async (id, title, article, users_id, filename, path, kategoris) => {
+        const [result] = await this.pool.execute(
+            `UPDATE article SET title=?, article=?, users_id=?, filename=?, path=?, kategoris_id=? WHERE id = ?`,
+            [title, article, users_id, filename, path, kategoris, id]
+        );
+        return result;
+    };
+
+    /**
+     * Menghapus artikel berdasarkan ID.
+     * @param {number} id - ID artikel.
+     * @returns {Promise&lt;Object>} Hasil eksekusi query.
+     */
+    deleteArticleById = async (id) => {
+        const [result] = await this.pool.execute(`DELETE FROM article WHERE id = ${id}`);
+        return result;
+    }
+
+    /**
+     * Mencari artikel berdasarkan judul.
+     * @param {string} name - Nama atau judul artikel yang dicari.
+     * @returns {Promise&lt;Array>} Daftar artikel yang cocok dengan pencarian.
+     */
+    searchArticle = async (name) => {
+        const [result] = await this.pool.query(`SELECT * FROM article WHERE title LIKE ?`, [`%${name}%`]);
+        return result;
+    }
+
+    /**
+     * Mengurutkan artikel berdasarkan kolom dan tipe urutan.
+     * @param {string} name - Nama kolom yang dijadikan dasar pengurutan.
+     * @param {string} type - Tipe urutan (ASC atau DESC).
+     * @returns {Promise&lt;Array>} Daftar artikel yang diurutkan.
+     */
+    sortingArticle = async (name, type) => {
+        const [result] = await this.pool.query(`SELECT * FROM article ORDER BY ${name} ${type}`);
+        return result;
+    }
+
+    /**
+     * Memfilter artikel berdasarkan kategori.
+     * @param {number} kategori - ID kategori.
+     * @returns {Promise&lt;Array>} Daftar artikel yang sesuai dengan kategori.
+     */
+    filterArticle = async (kategori) => {
+        const [result] = await this.pool.query(`SELECT * FROM article WHERE kategoris_id = ${kategori}`);
+        return result;
+    }
+}
+
+module.exports = ArticleController;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ArticleController.html">ArticleController</a></li><li><a href="AuthController.html">AuthController</a></li><li><a href="KategoriController.html">KategoriController</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.3</a> on Thu Jun 20 2024 08:29:20 GMT+0700 (Western Indonesia Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
