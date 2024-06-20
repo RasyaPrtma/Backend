@@ -53,7 +53,6 @@ class ArticleHandler {
         const { id } = req.auth.credentials;
         try {
             const categoris = await this.KategoriController.getKategoriByName(kategori);
-
             if (categoris.length == 0) {
                 return h.response({
                     status: 'gagal',
