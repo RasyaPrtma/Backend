@@ -50,7 +50,8 @@ class AuthHandler {
                     status: 'berhasil',
                     message: 'berhasil login',
                     data: {
-                        token
+                        token,
+                        username: auth[0].username
                     }
                 }).code(200);
             } else {
