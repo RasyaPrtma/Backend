@@ -172,7 +172,7 @@ class KategoriHandler {
             }).code(200);
 
         } catch (error) {
-            console.log('Server Error', error);
+            console.log('Server Error Coy \n', error);
             return h.response(error);
         }
     }
